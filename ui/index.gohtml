@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>URL shortener</title>
+</head>
+<body>
+{{if .Error}}
+    <p class="error">{{.Error}}</p>
+{{end}}
+<form action="/short" method="POST">
+    <label>
+        <input type="text" id="url" name="url" placeholder="Enter an absolute url here">
+    </label>
+    <button class="submit">short URL</button>
+</form>
+
+<h2>Short URL</h2>
+
+<div class="url">
+    <div class="new-url">
+        <a href="{{.ShortURL}}" target="_blank">{{.ShortURL}}</a>
+    </div>
+    <button class="copy">copy link</button>
+</div>
+
+</body>
+
+<style>
+    body {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: 'Poppins', sans-serif;
+        background: #453C67;
+    }
+
+    input {
+        height: 60px;
+        width: 800px;
+        font-size: 1.4rem;
+        margin: 10px;
+        border: 2px solid #46C2CB;
+        padding: 5px 15px;
+        background: transparent;
+        border-radius: 10px;
+        color: white;
+    }
+
+    h2 {
+        color: white;
+        margin-top: 100px;
+    }
+
+    input:focus {
+        outline: none;
+    }
+
+    button {
+        background: #6D67E4;
+        border: 2px solid #46C2CB;
+        color: white;
+        font-weight: bold;
+        height: 70px;
+        width: 200px;
+        font-size: 1.4rem;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-left: 20px;
+    }
+
+
+    .new-url {
+        height: 60px;
+        width: 600px;
+        font-size: 1.4rem;
+        margin: 10px;
+        border: 2px solid #F2F7A1;
+        padding: 5px 15px;
+        background: transparent;
+        border-radius: 10px;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .error{
+        color: #f65353;
+        font-size: 2rem;
+    }
+
+    .url {
+        display: flex;
+        align-items: center;
+    }
+</style>
+<script>
+
+</script>
+</html>
