@@ -6,10 +6,21 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 func (app *Application) IndexHandler(w http.ResponseWriter, r *http.Request) {
+	urlCode := r.URL.Path[1:]
+	longURL, err := app.model.GetLongURL(urlCode)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+	http.Redirect(w, r, longURL, http.StatusFound)
+}
 
+func (app *Application) FaviconHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "ui/assets/favicon.ico")
 }
 
 func (app *Application) HomeHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,39 +39,48 @@ func (app *Application) HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *Application) ShortHandler(w http.ResponseWriter, r *http.Request) {
-	data := TemplateData{}
 	err := r.ParseForm()
 	if err != nil {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		log.Println(err)
 		return
 	}
+
 	formURL := r.PostForm.Get("url")
 
 	if formURL == "" {
-		data.Error = "Error: url body cannot be empty"
-		renderUI(w, "./ui/index.gohtml", &data)
+		renderUI(w, "./ui/index.gohtml",
+			&TemplateData{URL: formURL, Error: "Error: url body cannot be empty"})
 		return
 	}
 
 	_, err = url.ParseRequestURI(formURL)
+
 	if err != nil {
-		data.Error = "Error: url is invalid"
-		renderUI(w, "./ui/index.gohtml", &data)
+		renderUI(w, "./ui/index.gohtml",
+			&TemplateData{URL: formURL, Error: "Error: url is invalid"})
 		return
 	}
 
-	code := shortuuid.New()
-	shortURL := BASE_URL + "/" + code
+	uuid := shortuuid.New()
+	code := uuid[:8]
+	shortURL := BASE_URL + code
+
 	err = app.model.NewURL(code, formURL, shortURL)
-	if err != nil {
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+
+	if err != nil && strings.Contains(err.Error(), "duplicate key") {
+		shortURL, err = app.model.GetShortURL(formURL)
+		if err != nil {
+			log.Println(err)
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+	} else if err != nil {
 		log.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	data.ShortURL = shortURL
-	data.URL = formURL
-	renderUI(w, "./ui/index.gohtml", &data)
+	renderUI(w, "./ui/index.gohtml", &TemplateData{URL: formURL, ShortURL: shortURL})
 
 }

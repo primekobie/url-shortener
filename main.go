@@ -41,10 +41,11 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", app.IndexHandler)
+	mux.HandleFunc("/favicon.ico", app.FaviconHandler)
 	mux.HandleFunc("/home", app.HomeHandler)
 	mux.HandleFunc("/short", app.ShortHandler)
 
-	fmt.Println("Starting server on port :4000")
+	fmt.Println("Starting server on port :4000 (http://localhost:4000)")
 	log.Fatal(http.ListenAndServe(":4000", mux))
 
 }

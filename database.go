@@ -1,11 +1,13 @@
 package main
 
-import "database/sql"
+import (
+	"database/sql"
+)
 
 type URLModel struct{ db *sql.DB }
 
 func (m *URLModel) NewURL(code, longURL, shortURL string) error {
-	query := `INSERT INTO links(url_code, long_url, short_url) VALUES ($1, $2, $3)`
+	query := `INSERT INTO urls(url_code, long_url, short_url) VALUES ($1, $2, $3)`
 	_, err := m.db.Exec(query, code, longURL, shortURL)
 	if err != nil {
 		return err
@@ -13,14 +15,22 @@ func (m *URLModel) NewURL(code, longURL, shortURL string) error {
 	return nil
 }
 
-func (m *URLModel) GetShortURL(urlCode string) (string, error) {
-	query := `SELECT long_url FROM links WHERE url_code=$1`
-	rows, err := m.db.Query(query, urlCode)
+func (m *URLModel) GetShortURL(longURL string) (string, error) {
+	query := `SELECT short_url FROM urls WHERE long_url=$1`
+	row := m.db.QueryRow(query, longURL)
+	var shortURL string
+	err := row.Scan(&shortURL)
 	if err != nil {
 		return "", err
 	}
+	return shortURL, nil
+}
+
+func (m *URLModel) GetLongURL(code string) (string, error) {
+	query := `SELECT long_url FROM urls WHERE url_code=$1`
+	row := m.db.QueryRow(query, code)
 	var longURL string
-	err = rows.Scan(&longURL)
+	err := row.Scan(&longURL)
 	if err != nil {
 		return "", err
 	}
